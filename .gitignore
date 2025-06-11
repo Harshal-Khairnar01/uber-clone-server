@@ -1,0 +1,47 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE related
+.vscode/
+.idea/
+
+# Build output
+dist/
+build/
+
+# Optional: Coverage reports
+coverage/
+
+# Optional: PM2 logs and dump files
+pids/
+*.pid
+*.seed
+*.pid.lock
+dump.rdb
+
+# Optional: dotenv override files
+.env.local
+.env.*.local
+
+# Optional: database or temp data
+*.sqlite
+*.sqlite3
+tmp/
+temp/
+
+# Optional: TypeScript specific
+*.tsbuildinfo
