@@ -1,30 +1,24 @@
-# User Login API Documentation
+
+
+# User Profile API Documentation
 
 ## Endpoint
 
-`POST /user/login`
+`GET /user/profile`
 
 ---
 
 ## Description
 
-Authenticates a user with email and password. Returns a JWT token and user data upon successful login.
+Retrieves the authenticated user's profile information. Requires authentication token.
 
 ---
 
-## Request Body
+## Authentication
 
-```json
-{
-  "email": "john.doe@example.com",
-  "password": "yourpassword"
-}
-```
-
-### Field Requirements
-
-- `email`: **string**, required, must be a valid email address
-- `password`: **string**, required, minimum 6 characters
+Requires valid JWT token in:
+- Authorization header: `Bearer <token>`
+- OR Cookie: `token=<token>`
 
 ---
 
@@ -38,44 +32,14 @@ Authenticates a user with email and password. Returns a JWT token and user data 
 
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "_id": "60c72b2f9b1d8c001c8e4b8a",
-    "fullname": {
-      "firstname": "John",
-      "lastname": "Doe"
-    },
-    "email": "john.doe@example.com"
-  }
+  "_id": "60c72b2f9b1d8c001c8e4b8a",
+  "fullname": {
+    "firstname": "John",
+    "lastname": "Doe"
+  },
+  "email": "john.doe@example.com"
 }
 ```
-
----
-
-### Validation Error
-
-**Status Code:** `400 Bad Request`
-
-**Example Response:**
-
-```json
-{
-  "errors": [
-    {
-      "msg": "Invalid Email",
-      "param": "email",
-      "location": "body"
-    },
-    {
-      "msg": "Password must be 6 character long!",
-      "param": "password",
-      "location": "body"
-    }
-  ]
-}
-```
-
----
 
 ### Authentication Error
 
@@ -85,7 +49,57 @@ Authenticates a user with email and password. Returns a JWT token and user data 
 
 ```json
 {
-  "message": "Invalid email or password"
+  "message": "No token provided"
+}
+```
+
+---
+
+# User Logout API Documentation
+
+## Endpoint
+
+`GET /user/logout`
+
+---
+
+## Description
+
+Logs out the current user by clearing the authentication token cookie and blacklisting the current token.
+
+---
+
+## Authentication
+
+Requires valid JWT token in:
+- Authorization header: `Bearer <token>`
+- OR Cookie: `token=<token>`
+
+---
+
+## Responses
+
+### Success
+
+**Status Code:** `200 OK`
+
+**Example Response:**
+
+```json
+{
+  "message": "Logged out successfully"
+}
+```
+
+### Authentication Error
+
+**Status Code:** `401 Unauthorized`
+
+**Example Response:**
+
+```json
+{
+  "message": "No token provided"
 }
 ```
 
@@ -93,5 +107,5 @@ Authenticates a user with email and password. Returns a JWT token and user data 
 
 ## Notes
 
-- The `token` can be used for authenticated requests.
-- Passwords are securely compared and never returned in responses.
+- After logout, the token is blacklisted and cannot be used for future requests
+- The authentication cookie is cleared from
