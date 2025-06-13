@@ -1,68 +1,81 @@
-// ...existing code...
+# Captain API Documentation
 
-# Captain Registration API Documentation 
+## Overview
+RESTful API for managing captain (driver) accounts in the Uber-clone system. Built with Node.js, Express, and MongoDB.
 
-## Endpoint
 
-`POST /api/captain/register`
+## Authentication
+JWT-based authentication implemented via:
+- Bearer token in Authorization header
+- HTTP-only secure cookies
 
----
+## API Endpoints
 
-## Description
+## 1. Register Captain
+**POST** `/api/captain/register`
 
-Registers a new captain (driver) with their vehicle details. Returns authentication token upon successful registration.
-
----
-
-## Request Body
-
+### Request Body:
 ```json
 {
   "fullname": {
-    "firstname": "John",
-    "lastname": "Doe"  // optional
+    "firstname": "John",     // required, min 3 characters
+    "lastname": "Doe"        // optional, min 3 characters if provided
   },
-  "email": "john.doe@example.com",
-  "password": "password123",
+  "email": "john@example.com",  // required, must be valid email format
+  "password": "password123",    // required, min 6 characters
   "vehicle": {
-    "color": "Black",
-    "plate": "ABC123",
-    "capacity": 4,
-    "vehicleType": "car" // one of: "car", "auto", "motorcycle"
+    "color": "Black",          // required, min 3 characters
+    "plate": "ABC123",         // required, min 3 characters, must be unique
+    "capacity": 4,             // required, min value 1
+    "vehicleType": "car"       // required, enum: "car", "auto", "motorcycle"
   }
 }
 ```
 
-### Validation Rules
-
-- Email must be valid format
-- First name must be at least 3 characters
-- Password must be at least 6 characters
-- Vehicle color must be at least 3 characters
-- Vehicle plate must be at least 3 characters and unique
-- Vehicle capacity must be at least 1
-- Vehicle type must be one of: "car", "auto", "motorcycle"
-
----
-
-## Responses
-
-### Success
-
-**Status Code:** `201 Created`
-
-**Example Response:**
-
+### Success Response (201):
 ```json
 {
-  "token": "jwt.token.here",
+  "token": "eyJhbGciOiJIUzI1NiIs...",  // JWT token, valid for 1 day
   "captain": {
     "_id": "60c72b2f9b1d8c001c8e4b8a",
     "fullname": {
-      "firstname": "John",  
+      "firstname": "John",
       "lastname": "Doe"
     },
-    "email": "john.doe@example.com",
+    "email": "john@example.com",
+    "vehicle": {
+      "color": "Black",
+      "plate": "ABC123",
+      "capacity": 4,
+      "vehicleType": "car"
+    },
+    "status": "inactive"      // default status for new captains
+  }
+}
+```
+
+## 2. Login Captain
+**POST** `/api/captain/login`
+
+### Request Body:
+```json
+{
+  "email": "john@example.com",    // required, must be valid email
+  "password": "password123"       // required, min 6 characters
+}
+```
+
+### Success Response (200):
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIs...",  // JWT token, valid for 1 day
+  "captain": {
+    "_id": "60c72b2f9b1d8c001c8e4b8a",
+    "fullname": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "john@example.com",
     "vehicle": {
       "color": "Black",
       "plate": "ABC123",
@@ -74,15 +87,60 @@ Registers a new captain (driver) with their vehicle details. Returns authenticat
 }
 ```
 
-### Validation Error
+## 3. Get Captain Profile
+**GET** `/api/captain/profile`
 
-**Status Code:** `400 Bad Request`
-
-**Example Response:**
-
+### Headers:
 ```json
 {
-  "errors": [
+  "Authorization": "Bearer eyJhbGciOiJIUzI1NiIs..."  // required, JWT token
+}
+```
+
+### Success Response (200):
+```json
+{
+  "_id": "60c72b2f9b1d8c001c8e4b8a",
+  "fullname": {
+    "firstname": "John",
+    "lastname": "Doe"
+  },
+  "email": "john@example.com",
+  "vehicle": {
+    "color": "Black",
+    "plate": "ABC123",
+    "capacity": 4,
+    "vehicleType": "car"
+  },
+  "status": "inactive",
+  "location": {                    // optional
+    "latitude": 12.9716,
+    "longitude": 77.5946
+  }
+}
+```
+
+## 4. Logout Captain
+**GET** `/api/captain/logout`
+
+### Headers:
+```json
+{
+  "Authorization": "Bearer eyJhbGciOiJIUzI1NiIs..."  // required, JWT token
+}
+```
+
+### Success Response (200):
+```json
+{
+  "message": "Logged out successfully!"
+}
+```
+
+### Error Responses (for all endpoints):
+```json
+{
+  "errors": [                            // Validation errors
     {
       "msg": "Invalid Email",
       "param": "email",
@@ -92,23 +150,20 @@ Registers a new captain (driver) with their vehicle details. Returns authenticat
 }
 ```
 
-### Conflict Error
-
-**Status Code:** `400 Bad Request`
-
-**Example Response:**
-
 ```json
 {
-  "message": "Captain already exists!"
+  "message": "Captain not found!"        // 404 error
 }
 ```
 
----
+```json
+{
+  "message": "Invalid email or password" // 401 error
+}
+```
 
-## Notes
-
-- A new captain starts with "inactive" status by default
-- The password is hashed before storing in the database
-- The authentication token expires in 1 day
-- Vehicle plate numbers must be unique
+```json
+{
+  "message": "Unauthorized access"       // 401 error
+}
+```
