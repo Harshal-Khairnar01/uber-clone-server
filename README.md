@@ -1,79 +1,47 @@
+// ...existing code...
 
-
-# User Profile API Documentation
+# Captain Registration API Documentation 
 
 ## Endpoint
 
-`GET /user/profile`
+`POST /api/captain/register`
 
 ---
 
 ## Description
 
-Retrieves the authenticated user's profile information. Requires authentication token.
+Registers a new captain (driver) with their vehicle details. Returns authentication token upon successful registration.
 
 ---
 
-## Authentication
-
-Requires valid JWT token in:
-- Authorization header: `Bearer <token>`
-- OR Cookie: `token=<token>`
-
----
-
-## Responses
-
-### Success
-
-**Status Code:** `200 OK`
-
-**Example Response:**
+## Request Body
 
 ```json
 {
-  "_id": "60c72b2f9b1d8c001c8e4b8a",
   "fullname": {
     "firstname": "John",
-    "lastname": "Doe"
+    "lastname": "Doe"  // optional
   },
-  "email": "john.doe@example.com"
+  "email": "john.doe@example.com",
+  "password": "password123",
+  "vehicle": {
+    "color": "Black",
+    "plate": "ABC123",
+    "capacity": 4,
+    "vehicleType": "car" // one of: "car", "auto", "motorcycle"
+  }
 }
 ```
 
-### Authentication Error
+### Validation Rules
 
-**Status Code:** `401 Unauthorized`
-
-**Example Response:**
-
-```json
-{
-  "message": "No token provided"
-}
-```
-
----
-
-# User Logout API Documentation
-
-## Endpoint
-
-`GET /user/logout`
-
----
-
-## Description
-
-Logs out the current user by clearing the authentication token cookie and blacklisting the current token.
-
----
-
-## Authentication
-
-Requires valid JWT token in:
-- Authorization header: `Bearer <token>`
-- OR Cookie: `token=<token>`
+- Email must be valid format
+- First name must be at least 3 characters
+- Password must be at least 6 characters
+- Vehicle color must be at least 3 characters
+- Vehicle plate must be at least 3 characters and unique
+- Vehicle capacity must be at least 1
+- Vehicle type must be one of: "car", "auto", "motorcycle"
 
 ---
 
@@ -81,25 +49,58 @@ Requires valid JWT token in:
 
 ### Success
 
-**Status Code:** `200 OK`
+**Status Code:** `201 Created`
 
 **Example Response:**
 
 ```json
 {
-  "message": "Logged out successfully"
+  "token": "jwt.token.here",
+  "captain": {
+    "_id": "60c72b2f9b1d8c001c8e4b8a",
+    "fullname": {
+      "firstname": "John",  
+      "lastname": "Doe"
+    },
+    "email": "john.doe@example.com",
+    "vehicle": {
+      "color": "Black",
+      "plate": "ABC123",
+      "capacity": 4,
+      "vehicleType": "car"
+    },
+    "status": "inactive"
+  }
 }
 ```
 
-### Authentication Error
+### Validation Error
 
-**Status Code:** `401 Unauthorized`
+**Status Code:** `400 Bad Request`
 
 **Example Response:**
 
 ```json
 {
-  "message": "No token provided"
+  "errors": [
+    {
+      "msg": "Invalid Email",
+      "param": "email",
+      "location": "body"
+    }
+  ]
+}
+```
+
+### Conflict Error
+
+**Status Code:** `400 Bad Request`
+
+**Example Response:**
+
+```json
+{
+  "message": "Captain already exists!"
 }
 ```
 
@@ -107,5 +108,7 @@ Requires valid JWT token in:
 
 ## Notes
 
-- After logout, the token is blacklisted and cannot be used for future requests
-- The authentication cookie is cleared from
+- A new captain starts with "inactive" status by default
+- The password is hashed before storing in the database
+- The authentication token expires in 1 day
+- Vehicle plate numbers must be unique

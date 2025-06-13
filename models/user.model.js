@@ -57,5 +57,5 @@ userSchema.statics.hashPassword=async function (password) {
 }
 
 const User = mongoose.models.user || mongoose.model("User", userSchema);
-console.log(userSchema.methods);
+
 module.exports=User;

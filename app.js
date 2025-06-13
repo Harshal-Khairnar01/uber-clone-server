@@ -11,6 +11,7 @@ const cookieParser = require('cookie-parser');
 const cors=require('cors');
 const connectDB = require('./utils/db');
 const userRouter = require('./routes/user.route');
+const captainRouter = require('./routes/captain.route');
 
 connectDB();
 
@@ -22,5 +23,6 @@ app.use(cookieParser());
 
 
 app.use('/api/user',userRouter);
+app.use('/api/captain',captainRouter);
 
 module.exports=app;
