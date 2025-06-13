@@ -1,27 +1,21 @@
-# User Registration API Documentation
+# User Login API Documentation
 
 ## Endpoint
 
-`POST /user/register`
+`POST /user/login`
 
 ---
 
 ## Description
 
-Registers a new user with the provided details. Validates input and returns a JWT token and user data upon successful registration.
+Authenticates a user with email and password. Returns a JWT token and user data upon successful login.
 
 ---
 
 ## Request Body
 
-Send a JSON object in the following format:
-
 ```json
 {
-  "fullname": {
-    "firstname": "John",
-    "lastname": "Doe"
-  },
   "email": "john.doe@example.com",
   "password": "yourpassword"
 }
@@ -29,8 +23,6 @@ Send a JSON object in the following format:
 
 ### Field Requirements
 
-- `fullname.firstname`: **string**, required, minimum 3 characters
-- `fullname.lastname`: **string**, optional, minimum 3 characters if provided
 - `email`: **string**, required, must be a valid email address
 - `password`: **string**, required, minimum 6 characters
 
@@ -40,7 +32,7 @@ Send a JSON object in the following format:
 
 ### Success
 
-**Status Code:** `201 Created`
+**Status Code:** `200 OK`
 
 **Example Response:**
 
@@ -75,11 +67,6 @@ Send a JSON object in the following format:
       "location": "body"
     },
     {
-      "msg": "First Name must be 3 character long!",
-      "param": "fullname.firstname",
-      "location": "body"
-    },
-    {
       "msg": "Password must be 6 character long!",
       "param": "password",
       "location": "body"
@@ -90,10 +77,21 @@ Send a JSON object in the following format:
 
 ---
 
+### Authentication Error
+
+**Status Code:** `401 Unauthorized`
+
+**Example Response:**
+
+```json
+{
+  "message": "Invalid email or password"
+}
+```
+
+---
+
 ## Notes
 
 - The `token` can be used for authenticated requests.
-- Passwords are securely hashed before storage.
-- Email must be unique.
-
----
+- Passwords are securely compared and never returned in responses.
